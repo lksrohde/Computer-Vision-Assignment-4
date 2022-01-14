@@ -16,7 +16,7 @@ def condition_points(points):
     t = np.mean(points, axis=0)[:-1]
     s = 0.5 * np.max(np.abs(points), axis=0)[:-1]
     T = np.eye(3)
-    T[0:2,2] = -t
+    T[0:2, 2] = -t
     T[0:2, 0:3] = T[0:2, 0:3] / np.expand_dims(s, axis=1)
     ps = points @ T.T
     return ps, T
@@ -47,10 +47,20 @@ def compute_fundamental(p1, p2):
         F: (3, 3) numpy array, fundamental matrix
     """
 
-    #
-    # You code here
-    #
+    n = np.shape(p1)[0]
 
+    A = np.zeros((n, 9))
+    for i, row in enumerate(p1):
+        x_p1 = row[0]
+        y_p1 = row[1]
+
+        x_p2 = p2[i][0]
+        y_p2 = p2[i][1]
+        A[i] = ([x_p1 * x_p2, y_p1 * x_p2, x_p2, x_p1 * y_p2, y_p1 * y_p2, y_p2, x_p1, y_p1, 1])
+
+    s, v, d = np.linalg.svd(A)
+    D = np.transpose(d[-1:, ])
+    return enforce_rank2(D.reshape((3, 3)))
 
 
 def eight_point(p1, p2):
@@ -63,13 +73,13 @@ def eight_point(p1, p2):
     Returns:
         F: (3, 3) numpy array, fundamental matrix with respect to the unconditioned coordinates
     """
+    ps1, T1 = condition_points(p1)
+    ps2, T2 = condition_points(p2)
 
-    #
-    # You code here
-    #
+    fund = compute_fundamental(ps1, ps2)
 
-
-
+    F = np.transpose(T2) @ fund @ T1
+    return F
 
 def draw_epipolars(F, p1, img):
     """ Computes the coordinates of the n epipolar lines (X1, Y1) on the left image border and (X2, Y2)
@@ -87,7 +97,6 @@ def draw_epipolars(F, p1, img):
     #
     # You code here
     #
-
 
 
 def compute_residuals(p1, p2, F):
