@@ -31,11 +31,10 @@ def enforce_rank2(A):
     Returns:
         A_hat: (3, 3) numpy array, matrix with rank at most 2
     """
-
-    #
-    # You code here
-    #
-
+    u, s, v_trans = np.linalg.svd(A)
+    s[-1] = 0
+    A_hat = u @ np.diag(s) @ v_trans
+    return A_hat
 
 
 def compute_fundamental(p1, p2):
