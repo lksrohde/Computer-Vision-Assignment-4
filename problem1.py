@@ -93,10 +93,25 @@ def draw_epipolars(F, p1, img):
         X1, X2, Y1, Y2: (n, ) numpy arrays containing the coordinates of the n epipolar lines
             at the image borders
     """
+    X1, X2, Y1, Y2 = [], [], [], []
 
-    #
-    # You code here
-    #
+    for i in range(p1.shape[0]):
+        l = F @ np.append(p1[i],1)
+
+        x1 = 0
+        y1 = -l[2]/l[1]
+
+        x2 = img.shape[1]
+        y2 = -(l[2] + l[0]*x2)/l[1]
+
+        X1.append(x1)
+        X2.append(x2)
+        Y1.append(y1)
+        Y2.append(y2)
+
+    return np.array(X1), np.array(X2), np.array(Y1), np.array(Y2)
+
+
 
 
 def compute_residuals(p1, p2, F):
@@ -112,9 +127,17 @@ def compute_residuals(p1, p2, F):
         avg_residual: average absolute residual value
     """
 
-    #
-    # You code here
-    #
+    max_residual = 0
+    avg_residual = 0
+
+    for i in range(p1.shape[0]):
+        abs_residual = np.linalg.norm(p1[i].T @ F @ p2[i])
+        max_residual = max(max_residual, abs_residual)
+        avg_residual += abs_residual
+    
+    avg_residual /= p1.shape[0]
+
+    return max_residual, avg_residual
 
 
 def compute_epipoles(F):
@@ -127,6 +150,8 @@ def compute_epipoles(F):
         e2: (2, ) numpy array, cartesian coordinates of the epipole in image 2
     """
 
-    #
-    # You code here
-    #
+    _,_, v = np.linalg.svd(F)
+    e1 = v[:, 2]
+    e2 = v[:, -1]
+
+    return e1, e2
