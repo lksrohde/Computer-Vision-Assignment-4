@@ -120,7 +120,7 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
             elif y > H - window_size:
                 window_height = -1 - window_size
             best_disp = 0
-            cost = np.iinfo(np.int).max
+            cost = 0
             used_disp = min(max_disp, window_width + 1)
             for i in range(used_disp):
                 patch1 = padded_img_l[window_height: window_height + window_size,
@@ -128,7 +128,7 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
                 patch2 = padded_img_r[window_height: window_height + window_size,
                          window_width - i: window_width + window_size - i]
                 curr_cost = cost_function(patch1, patch2, alpha)
-                if (curr_cost < cost):
+                if (curr_cost > cost):
                     best_disp = i
                     cost = curr_cost
             disparity[y][x] = best_disp
