@@ -103,10 +103,35 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
     assert max_disp > 0
     assert window_size % 2 == 1
 
-    #
-    # Your code goes here
-    #
-    disparity = padded_img_l.copy()
+    disparity = np.zeros(padded_img_l.shape)
+    H = padded_img_l.shape[0]
+    W = padded_img_l.shape[1]
+
+    for x in range(W):
+        window_width = x
+        if x < (window_size / 2) + 1:
+            window_width = 0
+        elif x > W - (window_size / 2) - 1:
+            window_width = W - window_size
+        for y in H:
+            window_height = y
+            if y < (window_size / 2) + 1:
+                window_height = 0
+            elif x > H - (window_size / 2) - 1:
+                window_height = H - window_size
+            best_disp = 0
+            cost = np.iinfo(np.int).max
+            used_disp = np.minimum(max_disp, window_width + 1)
+            for i in range(used_disp):
+                patch1 = padded_img_l[window_width:window_width + window_size,
+                         window_height: window_height + window_size]
+                patch2 = padded_img_r[window_width - i: window_width - 1 + window_size,
+                         window_height: window_height + window_size]
+                curr_cost = cost_function(patch1, patch2, alpha)
+                if (curr_cost < cost):
+                    best_disp = i
+                    cost = curr_cost
+            disparity[y][x] = best_disp
 
     assert disparity.ndim == 2
     return disparity
