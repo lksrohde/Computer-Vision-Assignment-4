@@ -31,18 +31,17 @@ def cost_nc(patch1, patch2):
     Returns:
         cost_nc: the calcuated NC cost as a floating point value
     """
-
     m = patch1.shape[0]
-    wl = np.reshape(patch1, (m**2, 1))
-    wr = np.reshape(patch2, (m**2, 1))
-    wl_mean = np.full((m ** 2, 1),np.mean(wl))
+    wl = np.reshape(patch1, (m ** 2, 1))
+    wr = np.reshape(patch2, (m ** 2, 1))
+    wl_mean = np.full((m ** 2, 1), np.mean(wl))
     wr_mean = np.full((m ** 2, 1), np.mean(wr))
 
     left_sub = wl - wl_mean
     right_sub = wr - wr_mean
     numerator = np.transpose(left_sub) @ (right_sub)
     denominator = np.linalg.norm(left_sub) * np.linalg.norm(right_sub)
-    cost_nc = (numerator/denominator)[0][0]
+    cost_nc = (numerator / denominator)[0][0]
 
     assert np.isscalar(cost_nc)
     return cost_nc
@@ -58,10 +57,10 @@ def cost_function(patch1, patch2, alpha):
     Returns:
         cost_val: the calculated cost value as a floating point value
     """
-    assert patch1.shape == patch2.shape 
+    assert patch1.shape == patch2.shape
 
     m = patch1.shape[0]
-    cost_val = (cost_ssd(patch1, patch2) / (m**2)) + alpha * cost_nc(patch1, patch2)
+    cost_val = (cost_ssd(patch1, patch2) / (m ** 2)) + alpha * cost_nc(patch1, patch2)
 
     assert np.isscalar(cost_val)
     return cost_val
@@ -97,8 +96,8 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
         disparity: numpy array (H,W) of the same type as image
     """
 
-    assert padded_img_l.ndim == 2 
-    assert padded_img_r.ndim == 2 
+    assert padded_img_l.ndim == 2
+    assert padded_img_r.ndim == 2
     assert padded_img_l.shape == padded_img_r.shape
     assert max_disp > 0
     assert window_size % 2 == 1
@@ -109,16 +108,16 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
 
     for x in range(W):
         window_width = x
-        if x < (window_size / 2) + 1:
+        if x < np.round(window_size / 2):
             window_width = 0
-        elif x > W - (window_size / 2) - 1:
-            window_width = W - window_size
+        elif x > W - np.floor(window_size / 2):
+            window_width = W - 1 - window_size
         for y in range(H):
             window_height = y
-            if y < (window_size / 2) + 1:
+            if y < np.round(window_size / 2):
                 window_height = 0
-            elif x > H - (window_size / 2) - 1:
-                window_height = H - window_size
+            elif x > H - np.floor(window_size / 2):
+                window_height = H - 1 - window_size
             best_disp = 0
             cost = np.iinfo(np.int).max
             used_disp = min(max_disp, window_width + 1)
@@ -136,6 +135,7 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
     assert disparity.ndim == 2
     return disparity
 
+
 def compute_aepe(disparity_gt, disparity_res):
     """Compute the average end-point error of the estimated disparity map:
     
@@ -146,8 +146,8 @@ def compute_aepe(disparity_gt, disparity_res):
     Returns:
         aepe: the average end-point error as a floating point value
     """
-    assert disparity_gt.ndim == 2 
-    assert disparity_res.ndim == 2 
+    assert disparity_gt.ndim == 2
+    assert disparity_res.ndim == 2
     assert disparity_gt.shape == disparity_res.shape
 
     N = disparity_gt.shape[0] * disparity_gt.shape[1]
@@ -158,10 +158,11 @@ def compute_aepe(disparity_gt, disparity_res):
     assert np.isscalar(aepe)
     return aepe
 
+
 def optimal_alpha():
     """Return alpha that leads to the smallest EPE 
     (w.r.t. other values)"""
-    
+
     #
     # Fix alpha
     #
@@ -172,6 +173,8 @@ def optimal_alpha():
 """
 This is a multiple-choice question
 """
+
+
 class WindowBasedDisparityMatching(object):
 
     def answer(self):
