@@ -11,10 +11,6 @@ def cost_ssd(patch1, patch2):
     Returns:
         cost_ssd: the calcuated SSD cost as a floating point value
     """
-
-    #
-    # Your code goes here
-    #
     cost_ssd = 0
 
     m = patch1.shape[0]
@@ -36,14 +32,12 @@ def cost_nc(patch1, patch2):
         cost_nc: the calcuated NC cost as a floating point value
     """
 
-    #
-    # Your code goes here
-    #
     m = patch1.shape[0]
     wl = np.reshape(patch1, (m**2, 1))
     wr = np.reshape(patch2, (m**2, 1))
     wl_mean = np.full((m ** 2, 1),np.mean(wl))
     wr_mean = np.full((m ** 2, 1), np.mean(wr))
+
     left_sub = wl - wl_mean
     right_sub = wr - wr_mean
     numerator = np.transpose(left_sub) @ (right_sub)
@@ -60,7 +54,6 @@ def cost_function(patch1, patch2, alpha):
     Args:
         patch1: input patch 1 as (m, m) numpy array
         patch2: input patch 2 as (m, m) numpy array
-        input_disparity: input disparity as an integer value        
         alpha: the weighting parameter for the cost function
     Returns:
         cost_val: the calculated cost value as a floating point value
@@ -69,7 +62,7 @@ def cost_function(patch1, patch2, alpha):
 
     m = patch1.shape[0]
     cost_val = (cost_ssd(patch1, patch2) / (m**2)) + alpha * cost_nc(patch1, patch2)
-    
+
     assert np.isscalar(cost_val)
     return cost_val
 
@@ -85,15 +78,26 @@ def pad_image(input_img, window_size, padding_mode='symmetric'):
     Returns:
         padded_img: padded image as a numpy array of the same type as image
     """
+
+    # [[0, 0, 0, 0, 0, 0, 0], "CONSTANT"
+    #  [0, 0, 1, 2, 3, 0, 0],
+    #  [0, 0, 4, 5, 6, 0, 0],
+    #  [0, 0, 0, 0, 0, 0, 0]]
+
+    # [[6, 5, 4, 5, 6, 5, 4], "REFLECT"
+    #  [3, 2, 1, 2, 3, 2, 1],
+    #  [6, 5, 4, 5, 6, 5, 4],
+    #  [3, 2, 1, 2, 3, 2, 1]]
+
+    # [[2, 1, 1, 2, 3, 3, 2], "SYMMETRIC"
+    #  [2, 1, 1, 2, 3, 3, 2],
+    #  [5, 4, 4, 5, 6, 6, 5],
+    #  [5, 4, 4, 5, 6, 6, 5]]
+
     assert np.isscalar(window_size)
     assert window_size % 2 == 1
 
-    #
-    # Your code goes here
-    #
-    padded_img = input_img.copy()
-
-    return padded_img
+    return np.pad(input_img, window_size, padding_mode)
 
 
 def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
@@ -187,4 +191,4 @@ class WindowBasedDisparityMatching(object):
 
         """
 
-        return (-1, -1, -1, -1)
+        return (1, -1, -1, -1)
