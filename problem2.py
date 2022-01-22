@@ -159,7 +159,7 @@ def compute_aepe(disparity_gt, disparity_res):
 
     N = disparity_gt.shape[0] * disparity_gt.shape[1]
 
-    d = disparity_gt - disparity_res
+    d = np.linalg.norm(disparity_gt - disparity_res,ord=1)
     aepe = d.sum() / N
 
     assert np.isscalar(aepe)
