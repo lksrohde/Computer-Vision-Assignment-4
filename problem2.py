@@ -15,8 +15,12 @@ def cost_ssd(patch1, patch2):
     #
     # Your code goes here
     #
-    cost_ssd = -1
+    cost_ssd = 0
 
+    m = patch1.shape[0]
+    for x in range(m):
+        for y in range(m):
+            cost_ssd += (patch1[x][y] - patch2[x][y]) ** 2
     assert np.isscalar(cost_ssd)
     return cost_ssd
 
@@ -35,7 +39,16 @@ def cost_nc(patch1, patch2):
     #
     # Your code goes here
     #
-    cost_nc = -1
+    m = patch1.shape[0]
+    wl = np.reshape(patch1, (m**2, 1))
+    wr = np.reshape(patch2, (m**2, 1))
+    wl_mean = np.full((m ** 2, 1),np.mean(wl))
+    wr_mean = np.full((m ** 2, 1), np.mean(wr))
+    left_sub = wl - wl_mean
+    right_sub = wr - wr_mean
+    numerator = np.transpose(left_sub) @ (right_sub)
+    denominator = np.linalg.norm(left_sub) * np.linalg.norm(right_sub)
+    cost_nc = numerator/denominator
 
     assert np.isscalar(cost_nc)
     return cost_nc
@@ -54,10 +67,8 @@ def cost_function(patch1, patch2, alpha):
     """
     assert patch1.shape == patch2.shape 
 
-    #
-    # Your code goes here
-    #
-    cost_val = -1
+    m = patch1.shape[0]
+    cost_val = (cost_ssd(patch1, patch2) / (m**2)) + alpha * cost_nc(patch1, patch2)
     
     assert np.isscalar(cost_val)
     return cost_val
