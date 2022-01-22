@@ -106,14 +106,18 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
     disparity = np.zeros(padded_img_l.shape)
     H = padded_img_l.shape[0]
     W = padded_img_l.shape[1]
+    pad = window_size
+    #print(pad)
+    disparity = np.zeros((padded_img_l.shape[0] - (window_size*2), padded_img_l.shape[1]- (window_size*2)))  
+    
 
-    for x in range(W):
+    for x in range(pad + 1, W - pad - 1): 
         window_width = x
         if x < np.round(window_size / 2):
             window_width = 0
         elif x > W - window_size:
             window_width = -1 - window_size
-        for y in range(H):
+        for y in range(pad + 1, H - pad - 1):
             window_height = y
             if y < np.round(window_size / 2):
                 window_height = 0
@@ -128,10 +132,10 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
                 patch2 = padded_img_r[window_height: window_height + window_size,
                          window_width - i: window_width + window_size - i]
                 curr_cost = cost_function(patch1, patch2, alpha)
-                if (curr_cost > cost):
+                if (curr_cost < cost):
                     best_disp = i
                     cost = curr_cost
-            disparity[y][x] = best_disp
+            disparity[y-pad][x-pad] = best_disp
 
     assert disparity.ndim == 2
     return disparity
@@ -147,6 +151,8 @@ def compute_aepe(disparity_gt, disparity_res):
     Returns:
         aepe: the average end-point error as a floating point value
     """
+    print(disparity_gt.shape)
+    print(disparity_res.shape)
     assert disparity_gt.ndim == 2
     assert disparity_res.ndim == 2
     assert disparity_gt.shape == disparity_res.shape
@@ -167,8 +173,12 @@ def optimal_alpha():
     #
     # Fix alpha
     #
-    alpha = np.random.choice([-0.06, -0.01, 0.04, 0.1])
-    return alpha
+    #alpha = np.random.choice([-0.06, -0.01, 0.04, 0.1])
+    #-0.06 AEPE: -0.0218
+    #-0.01 AEPE: 0.756
+    #0.04 AEPE: 3.860
+    #0.1 AEPE: 2.949
+    return -0.06
 
 
 """
@@ -204,4 +214,4 @@ class WindowBasedDisparityMatching(object):
 
         """
 
-        return (1, -1, -1, -1)
+        return (1, 2, 1, -1)
