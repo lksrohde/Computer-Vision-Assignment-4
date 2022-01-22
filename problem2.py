@@ -79,24 +79,8 @@ def pad_image(input_img, window_size, padding_mode='symmetric'):
         padded_img: padded image as a numpy array of the same type as image
     """
 
-    # [[0, 0, 0, 0, 0, 0, 0], "CONSTANT"
-    #  [0, 0, 1, 2, 3, 0, 0],
-    #  [0, 0, 4, 5, 6, 0, 0],
-    #  [0, 0, 0, 0, 0, 0, 0]]
-
-    # [[6, 5, 4, 5, 6, 5, 4], "REFLECT"
-    #  [3, 2, 1, 2, 3, 2, 1],
-    #  [6, 5, 4, 5, 6, 5, 4],
-    #  [3, 2, 1, 2, 3, 2, 1]]
-
-    # [[2, 1, 1, 2, 3, 3, 2], "SYMMETRIC"
-    #  [2, 1, 1, 2, 3, 3, 2],
-    #  [5, 4, 4, 5, 6, 6, 5],
-    #  [5, 4, 4, 5, 6, 6, 5]]
-
     assert np.isscalar(window_size)
     assert window_size % 2 == 1
-
     return np.pad(input_img, window_size, padding_mode)
 
 
@@ -141,10 +125,10 @@ def compute_aepe(disparity_gt, disparity_res):
     assert disparity_res.ndim == 2 
     assert disparity_gt.shape == disparity_res.shape
 
-    #
-    # Your code goes here
-    #
-    aepe = -1
+    N = disparity_gt.shape[0] * disparity_gt.shape[1]
+
+    d = disparity_gt - disparity_res
+    aepe = d.sum() / N
 
     assert np.isscalar(aepe)
     return aepe
