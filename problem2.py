@@ -42,7 +42,7 @@ def cost_nc(patch1, patch2):
     right_sub = wr - wr_mean
     numerator = np.transpose(left_sub) @ (right_sub)
     denominator = np.linalg.norm(left_sub) * np.linalg.norm(right_sub)
-    cost_nc = numerator/denominator
+    cost_nc = (numerator/denominator)[0][0]
 
     assert np.isscalar(cost_nc)
     return cost_nc
@@ -113,7 +113,7 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
             window_width = 0
         elif x > W - (window_size / 2) - 1:
             window_width = W - window_size
-        for y in H:
+        for y in range(H):
             window_height = y
             if y < (window_size / 2) + 1:
                 window_height = 0
@@ -125,7 +125,7 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
             for i in range(used_disp):
                 patch1 = padded_img_l[window_width:window_width + window_size,
                          window_height: window_height + window_size]
-                patch2 = padded_img_r[window_width - i: window_width - 1 + window_size,
+                patch2 = padded_img_r[window_width - i: window_width + window_size - i,
                          window_height: window_height + window_size]
                 curr_cost = cost_function(patch1, patch2, alpha)
                 if (curr_cost < cost):
