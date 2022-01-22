@@ -32,6 +32,7 @@ def cost_nc(patch1, patch2):
         cost_nc: the calcuated NC cost as a floating point value
     """
     m = patch1.shape[0]
+
     wl = np.reshape(patch1, (m ** 2, 1))
     wr = np.reshape(patch2, (m ** 2, 1))
     wl_mean = np.full((m ** 2, 1), np.mean(wl))
@@ -110,22 +111,22 @@ def compute_disparity(padded_img_l, padded_img_r, max_disp, window_size, alpha):
         window_width = x
         if x < np.round(window_size / 2):
             window_width = 0
-        elif x > W - np.floor(window_size / 2):
-            window_width = W - 1 - window_size
+        elif x > W - window_size:
+            window_width = -1 - window_size
         for y in range(H):
             window_height = y
             if y < np.round(window_size / 2):
                 window_height = 0
-            elif x > H - np.floor(window_size / 2):
-                window_height = H - 1 - window_size
+            elif y > H - window_size:
+                window_height = -1 - window_size
             best_disp = 0
             cost = np.iinfo(np.int).max
             used_disp = min(max_disp, window_width + 1)
             for i in range(used_disp):
-                patch1 = padded_img_l[window_width:window_width + window_size,
-                         window_height: window_height + window_size]
-                patch2 = padded_img_r[window_width - i: window_width + window_size - i,
-                         window_height: window_height + window_size]
+                patch1 = padded_img_l[window_height: window_height + window_size,
+                         window_width:window_width + window_size]
+                patch2 = padded_img_r[window_height: window_height + window_size,
+                         window_width - i: window_width + window_size - i]
                 curr_cost = cost_function(patch1, patch2, alpha)
                 if (curr_cost < cost):
                     best_disp = i
